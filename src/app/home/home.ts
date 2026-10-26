@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { DashboardService } from '../services/dashboard';
-import { throwError } from 'rxjs';
+import { finalize } from 'rxjs';
+
 
 @Component({
   imports: [
@@ -19,17 +20,20 @@ export class Home {
   isLoading = true;
 
   constructor(private dashboardService: DashboardService) {
-    // throwError(() => new Error('خطای آزمایشی')).subscribe({
-    this.dashboardService.getStats().subscribe({
+   
+    this.dashboardService.getStats().pipe(
+      finalize(() => {
+        this.isLoading = false;
+      })
+    ).subscribe({
       next: data => {
         this.stats = data;
         this.errorMessage = '';
-        this.isLoading = false;
       },
       error: err => {
         this.errorMessage = 'دریافت اطلاعات داشبورد ناموفق بود.';
-        this.isLoading = false;
       }
     });
+
   }
 }
